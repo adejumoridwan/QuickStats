@@ -1,7 +1,6 @@
 #importing required libraries
 import streamlit as st
 import pandas as pd
-import seaborn as sns
 
 
 st.sidebar.header("Upload Data")
@@ -29,11 +28,15 @@ if uploaded_file:
 
     st.sidebar.header("Visualization Controls")
 
-    st.sidebar.selectbox('Select X-axis', data_variables)
+    plot_type = st.sidebar.selectbox("Select Plot Type", ["BarChart","Histogram","Boxplot","Scatterplot","Lineplot"])
 
-    st.sidebar.selectbox('Select Y-axis', data_variables)
+    x_axis = st.sidebar.selectbox('Select X-axis', data_variables)
 
-    st.sidebar.selectbox('Select Group', data_variables)
+    y_axis = st.sidebar.selectbox('Select Y-axis', data_variables)
+
+    group = st.sidebar.selectbox('Select Group', data_variables)
+
+    
 
     
 
