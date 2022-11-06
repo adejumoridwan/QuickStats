@@ -1,6 +1,7 @@
 #importing required libraries
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 
 st.sidebar.header("Upload Data")
@@ -16,7 +17,7 @@ if uploaded_file:
     else:
         data= pd.read_csv(uploaded_file)
 
-    Data, Descriptive, Visualization, Inferential = st.tabs(["Data", "Descriptive","Visualization","Inferential"])
+    Data, Descriptive, Visualization = st.tabs(["Data", "Descriptive","Visualization"])
     
     Data.dataframe(data)
 
@@ -28,22 +29,34 @@ if uploaded_file:
 
     st.sidebar.header("Visualization Controls")
 
-    plot_type = st.sidebar.selectbox("Select Plot Type", ["BarChart","Histogram","Boxplot","Scatterplot","Lineplot"])
+    plot_type = st.sidebar.selectbox("Select Plot Type", ("BarChart","Histogram","Boxplot","Scatterplot","Lineplot"))
 
-    x_axis = st.sidebar.selectbox('Select X-axis', data_variables)
+    if plot_type == "BarChart":
+        x_axis = st.sidebar.selectbox('Select X-axis', data_variables)
 
-    y_axis = st.sidebar.selectbox('Select Y-axis', data_variables)
+        y_axis = st.sidebar.selectbox('Select Y-axis', data_variables)
 
-    group = st.sidebar.selectbox('Select Group', data_variables)
+        group = st.sidebar.selectbox('Select Group', data_variables)
 
-    
+        if data[x_axis].dtype == 'object':
+            bar_fig = px.bar(data, x=x_axis, color = group, barmode="group")
+            Visualization.write(bar_fig)
+        else:
+            Visualization.error("please select a categorical variable")
+    elif plot_type == "Histogram":
+        x_axis = st.sidebar.selectbox('Select X-axis', data_variables)
 
-    
+        bins = st.sidebar.slider("Number of Bins",0,100)
+
+        if (data[x_axis].dtype == 'float64') or (data[x_axis].dtype == 'int64'):
+            hist_fig = px.histogram(data, x=x_axis, nbins=bins)
+            Visualization.write(hist_fig)
+        else:
+            Visualization.error("please select a numerical variable")
+
 
 #retun message if no file is uploaded
 else:
     st.subheader("Please Upload a Valid File Format")
-
-
 
 
