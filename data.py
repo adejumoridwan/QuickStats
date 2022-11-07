@@ -34,8 +34,6 @@ if uploaded_file:
     if plot_type == "BarChart":
         x_axis = st.sidebar.selectbox('Select X-axis', data_variables)
 
-        y_axis = st.sidebar.selectbox('Select Y-axis', data_variables)
-
         group = st.sidebar.selectbox('Select Group', data_variables)
 
         if data[x_axis].dtype == 'object':
@@ -53,6 +51,31 @@ if uploaded_file:
             Visualization.write(hist_fig)
         else:
             Visualization.error("please select a numerical variable")
+    elif plot_type == "Boxplot":
+        x_axis = st.sidebar.selectbox('Select X-axis', data_variables)
+
+        y_axis = st.sidebar.selectbox('Select Y-axis', data_variables)
+
+        group = st.sidebar.selectbox('Select Group', data_variables)
+
+        if data[x_axis].dtype == 'object':
+            box_fig = px.box(data, x=x_axis, y=y_axis, color = group)
+            Visualization.write(box_fig)
+        else:
+            Visualization.error("please select a categorical variable")
+    elif plot_type == "Scatterplot":
+        x_axis = st.sidebar.selectbox('Select X-axis', data_variables)
+
+        y_axis = st.sidebar.selectbox('Select Y-axis', data_variables)
+
+        group = st.sidebar.selectbox('Select Group', data_variables)
+
+        if ((data[x_axis].dtype == 'float64') or (data[x_axis].dtype == 'int64')) and ((data[y_axis].dtype == 'float64') or (data[y_axis].dtype == 'int64')):
+            scatter_fig = px.scatter(data, x=data[x_axis], y=data[y_axis], color=group)
+            Visualization.write(scatter_fig)
+
+        
+
 
 
 #retun message if no file is uploaded
