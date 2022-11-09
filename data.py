@@ -4,19 +4,7 @@ import pandas as pd
 import plotly.express as px
 
 
-st.sidebar.header("Upload Data")
-
-# Allow only .csv and .xlsx files to be uploaded
-uploaded_file = st.sidebar.file_uploader("Upload CSV or Excel File", type=["csv", "xlsx"])
-
-# Check if file was uploaded
-if uploaded_file:
-    # Check MIME type of the uploaded file
-    if uploaded_file.type == "xlsx":
-        data = pd.read_excel(uploaded_file, engine = "openpyxl")
-    else:
-        data= pd.read_csv(uploaded_file)
-
+def analysis():
     Data, Descriptive, Visualization = st.tabs(["Data", "Descriptive","Visualization"])
     
     Data.dataframe(data)
@@ -71,15 +59,41 @@ if uploaded_file:
         group = st.sidebar.selectbox('Select Group', data_variables)
 
         if ((data[x_axis].dtype == 'float64') or (data[x_axis].dtype == 'int64')) and ((data[y_axis].dtype == 'float64') or (data[y_axis].dtype == 'int64')):
-            scatter_fig = px.scatter(data, x=data[x_axis], y=data[y_axis], color=group)
+            scatter_fig = px.scatter(data, x=x_axis, y=y_axis, color=group)
             Visualization.write(scatter_fig)
+    else:
+        x_axis = st.sidebar.selectbox('Select X-axis', data_variables)
 
-        
+        y_axis = st.sidebar.selectbox('Select Y-axis', data_variables)
 
+        group = st.sidebar.selectbox('Select Group', data_variables)
+
+        lineplot = px.line(data, x=x_axis, y=y_axis)
+        Visualization.write(lineplot)
+
+st.sidebar.header("Upload Data")
+
+# Allow only .csv and .xlsx files to be uploaded
+uploaded_file = st.sidebar.file_uploader("Upload CSV or Excel File", type=["csv", "xlsx"])
 
 
 #retun message if no file is uploaded
-else:
-    st.subheader("Please Upload a Valid File Format")
+if uploaded_file is None:
+    use_default = st.checkbox("Use Default Dataset")
+    if use_default == True:
+        data = pd.read_csv("sales.csv")
+        analysis()
+
+# Check if file was uploaded
+elif uploaded_file is not None:
+    # Check MIME type of the uploaded file
+    if uploaded_file.type == "xlsx":
+        data = pd.read_excel(uploaded_file, engine = "openpyxl")
+    elif uploaded_file.type == "csv":
+        data = pd.read_csv(uploaded_file)
+
+    analysis()
+
+
 
 
