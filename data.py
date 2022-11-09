@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 
 
-def analysis():
+def analysis(data):
     Data, Descriptive, Visualization = st.tabs(["Data", "Descriptive","Visualization"])
     
     Data.dataframe(data)
@@ -71,29 +71,22 @@ def analysis():
         lineplot = px.line(data, x=x_axis, y=y_axis)
         Visualization.write(lineplot)
 
+use_default = st.checkbox("Use Default Dataset")
+
 st.sidebar.header("Upload Data")
 
 # Allow only .csv and .xlsx files to be uploaded
 uploaded_file = st.sidebar.file_uploader("Upload CSV or Excel File", type=["csv", "xlsx"])
 
 
-#retun message if no file is uploaded
-if uploaded_file is None:
-    use_default = st.checkbox("Use Default Dataset")
-    if use_default == True:
+if use_default:
+    if uploaded_file is None:
         data = pd.read_csv("sales.csv")
-        analysis()
-
-# Check if file was uploaded
-elif uploaded_file is not None:
-    # Check MIME type of the uploaded file
-    if uploaded_file.type == "xlsx":
-        data = pd.read_excel(uploaded_file, engine = "openpyxl")
-    elif uploaded_file.type == "csv":
+        analysis(data)
+else:
+    if uploaded_file is not None:
         data = pd.read_csv(uploaded_file)
-
-    analysis()
-
+        analysis(data)
 
 
 
