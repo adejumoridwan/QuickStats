@@ -3,7 +3,6 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-
 def analysis(data):
     Data, Descriptive, Visualization = st.tabs(["Data", "Descriptive","Visualization"])
     
@@ -17,7 +16,10 @@ def analysis(data):
 
     st.sidebar.header("Visualization Controls")
 
+    analyze = st.sidebar.button("Analyze")
+
     plot_type = st.sidebar.selectbox("Select Plot Type", ("BarChart","Histogram","Boxplot","Scatterplot","Lineplot"))
+
 
     if plot_type == "BarChart":
         x_axis = st.sidebar.selectbox('Select X-axis', data_variables)
@@ -75,18 +77,19 @@ use_default = st.checkbox("Use Default Dataset")
 
 st.sidebar.header("Upload Data")
 
-# Allow only .csv and .xlsx files to be uploaded
+#Allow only .csv to be uploaded
 uploaded_file = st.sidebar.file_uploader("Upload CSV or Excel File", type=["csv", "xlsx"])
+
+
 
 
 if use_default:
     if uploaded_file is None:
         data = pd.read_csv("sales.csv")
         analysis(data)
+
 else:
     if uploaded_file is not None:
         data = pd.read_csv(uploaded_file)
         analysis(data)
-
-
 
