@@ -105,9 +105,78 @@ def analysis(data):
     #Statistical Analysis
     #----------------------------------------------------------------------------------------------------------------------------
     st.sidebar.header("Statisitical Analysis")
-    select_stat = st.sidebar.selectbox("Select a Statistical Analysis", ["Correlation", "Linear Regression","t-test","One Way", "Two-Way ANOVA","Chi-Square",])
+    select_stat = st.sidebar.selectbox("Select a Statistical Analysis", ["Correlation", "Linear Regression","t-test","ANOVA(One-Way)", "ANOVA(Two-Way)","Chi-Square",])
+    col1, col2= Statistics.columns([1, 5])
 
-    #Perfrom Correlation Analyssi if correlation is selected
+    #Perfrom Correlation Analysis if correlation is selected
+    if select_stat == "Correlation":
+        with col1:
+            cor_var1 = st.selectbox("Variable 1", data_variables)
+            cor_var2 = st.selectbox("Variable 2", data_variables)
+        
+        with col2:
+                if (data[cor_var1].dtype in ["float64","int64"]) and (data[cor_var2].dtype in ["float64","int64"]):
+                    corr = pearsonr(data[cor_var1], data[cor_var2])
+                    st.subheader(f"The correlation coefficient(r) between {cor_var1} and {cor_var2} is {round(corr[0],4)}")
+                else:
+                    st.error("Please select numeric variables")
+    
+    #Perfrom regression Analysis if regression is selected
+    elif select_stat == "Linear Regression":
+        with col1:
+            output = st.selectbox("Response Variable", data_variables)
+            predictor = st.multiselect("Predictor Variables", data_variables)
+        with col2:
+            if (data[output].dtype in ["float64","int64"]) or (data[predictor].dtype in ["float64","int64"]):
+                formula = "data[output] ~ data[predictor]"
+                lm = ols(formula, data).fit()
+                st.write(lm.summary())
+            else:
+                col2.error("Please select numeric variables")
+
+    #perform t-test analysis
+    elif select_stat == "t-test":
+        with col1:
+            cat_var = st.selectbox("Categorial Variable",data_variables)
+            cont_var = st.selectbox("Continous Variable", data_variables)
+            groups = data[cat_var].unique()
+            group_1 = st.selectbox("Group 1", groups)
+            group_2 = st.selectbox("Group 2", groups)
+        
+        with col2:
+            if data[cat_var].dtype not in ["float64", "int64"] and data[cont_var].dtype in ["float64", "int64"]:
+                    x = data.loc[data[cat_var] == group_1, cont_var]
+                    y = data.loc[data[cat_var] == group_2, cont_var]
+                    t_test = stats.ttest_ind(x, y)
+                    if t_test[1] < 0.05:
+                        st.subheader(f"Reject null hypothesis since p-value < 0.05 and t-test statistic = {round(t_test[0],4)}")
+                    else:
+                        st.subheader(f"Accept null hypothesis since p-value > 0.05 and t-test statistic = {round(t_test[0],4)}")
+            else:
+                st.error("Please the specify the right variables")
+
+
+    #perform two-way anova test
+    elif select_stat == "ANOVA(One-Way)":
+        with col1:
+            resp = st.selectbox("Response Variable", data_variables)
+            treatment_A = st.selectbox("Treatment A", data_variables)
+            treatment_B = st.selectbox("Treatment B", data_variables)
+
+        with col2:
+            if (data[resp].dtype in ["float64","int64"]) and (data[treatment_A].dtype == "object") and (data[treatment_B].dtype == "object"):
+                response = data[resp]
+                A = data[treatment_A]
+                B = data[treatment_B]
+                formula = "response ~ A + B + A:B"
+                lm = ols(formula, data=data).fit()
+                anova_table = sm.stats.anova_lm(lm, typ = 2)
+                st.write(anova_table)
+
+    
+
+
+
 
 
 use_default = st.checkbox("Use Default Dataset")
@@ -115,6 +184,7 @@ st.sidebar.header("Upload Data")
 
 #Upload File
 uploaded_file = st.sidebar.file_uploader("Upload CSV or Excel File", type=["csv", "xlsx"])
+
 
 
 #----------------------------------------------------------------------------------------------------------------------------
