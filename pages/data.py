@@ -9,12 +9,13 @@ import numpy as np
 import pandas as pd
 #plotly
 import plotly.express as px
+
 #scipy
 import scipy.stats as stats
 from scipy.stats import pearsonr
 from scipy.stats import f_oneway
-from scipy.stats import chisquare
-from scipy.stats import chi2_contingency
+from scipy.stats import chi2_contingency 
+
 #statsmodels
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
@@ -104,7 +105,7 @@ def analysis(data):
     #----------------------------------------------------------------------------------------------------------------------------
     #Statistical Analysis
     #----------------------------------------------------------------------------------------------------------------------------
-    st.sidebar.header("Statisitical Analysis")
+    st.sidebar.header("Statistical Analysis")
     select_stat = st.sidebar.selectbox("Select a Statistical Analysis", ["Correlation", "Linear Regression","t-test","ANOVA(One-Way)", "ANOVA(Two-Way)","Chi-Square",])
     col1, col2= Statistics.columns([1, 5])
 
@@ -149,32 +150,67 @@ def analysis(data):
                     y = data.loc[data[cat_var] == group_2, cont_var]
                     t_test = stats.ttest_ind(x, y)
                     if t_test[1] < 0.05:
-                        st.subheader(f"Reject null hypothesis since p-value < 0.05 and t-test statistic = {round(t_test[0],4)}")
+                        st.write(f"Reject Null Hypothesis since p-value < 0.05 and t-test statistic = {round(t_test[0],4)}")
                     else:
-                        st.subheader(f"Accept null hypothesis since p-value > 0.05 and t-test statistic = {round(t_test[0],4)}")
+                        st.write(f"Fail to reject Null Hypothesis since p-value > 0.05 and t-test statistic = {round(t_test[0],4)}")
             else:
                 st.error("Please the specify the right variables")
 
 
     #perform two-way anova test
-    elif select_stat == "ANOVA(One-Way)":
+    elif select_stat == "ANOVA(Two-Way)":
         with col1:
             resp = st.selectbox("Response Variable", data_variables)
-            treatment_A = st.selectbox("Treatment A", data_variables)
-            treatment_B = st.selectbox("Treatment B", data_variables)
+            factor_A = st.selectbox("Factor A", data_variables)
+            factor_B = st.selectbox("Factor B", data_variables)
 
         with col2:
-            if (data[resp].dtype in ["float64","int64"]) and (data[treatment_A].dtype == "object") and (data[treatment_B].dtype == "object"):
+            if (data[resp].dtype in ["float64","int64"]) and (data[factor_A].dtype == "object") and (data[factor_B].dtype == "object"):
                 response = data[resp]
-                A = data[treatment_A]
-                B = data[treatment_B]
+                A = data[factor_A]
+                B = data[factor_B]
                 formula = "response ~ A + B + A:B"
                 lm = ols(formula, data=data).fit()
                 anova_table = sm.stats.anova_lm(lm, typ = 2)
                 st.write(anova_table)
+            else:
+                st.error("please give the right variables")
 
-    
+    #Perform chi-square analysis
+    elif select_stat == "Chi-Square":
+        with col1:
+            chisq_var_A = st.selectbox("Factor A", data_variables)
+            chisq_var_B = st.selectbox("Factor B", data_variables)
 
+        with col2:
+            if data[chisq_var_A].dtype == "object" and data[chisq_var_B].dtype == "object":
+                cross_tab = pd.crosstab(index=data[chisq_var_A], columns=data[chisq_var_B])
+                st.table(cross_tab)
+                cross_tab_matrix = np.array(cross_tab)
+                chisq_analysis = chi2_contingency(cross_tab_matrix)
+                if chisq_analysis[1] < 0.05:
+                    st.write(f"Dependent(Reject Null Hypothesis)")
+                else:
+                    st.write(f"Independent(Fail to reject Null Hypothesis)")
+
+            else:
+                st.error("please give the right variables")
+
+    elif select_stat == "ANOVA(One-Way)":
+        with col1:
+            resp = st.selectbox("Response", data_variables)
+            factor = st.selectbox("Factor", data_variables)
+        with col2:
+            if (data[resp].dtype in ["float64","int64"]) and (data[factor].dtype == "object"):
+                response = data[resp]
+                Factor = data[factor]                
+                formula = "response ~ Factor"
+                lm = ols(formula, data=data).fit()
+                anova_table = sm.stats.anova_lm(lm, typ = 1)
+                st.write(anova_table)
+            else:
+                st.error("please give the right variables")
+            
 
 
 
@@ -184,7 +220,6 @@ st.sidebar.header("Upload Data")
 
 #Upload File
 uploaded_file = st.sidebar.file_uploader("Upload CSV or Excel File", type=["csv", "xlsx"])
-
 
 
 #----------------------------------------------------------------------------------------------------------------------------
