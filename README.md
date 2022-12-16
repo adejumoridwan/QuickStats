@@ -14,4 +14,4 @@ To use QuickStats, simply upload your data and select the analysis methods you w
 
 # Who is it for?
 
-QuickStats is ideal for data scientists, business analysts, and students who want to quickly and easily explore their data and uncover valuable insights. Give it a try today and see how it can help you make sense of your data.  
+QuickStats is ideal for data scientists, business analysts, and students who want to quickly and easily explore their data and uncover valuable insights. [Give it a try today]() and see how it can help you make sense of your data.  
