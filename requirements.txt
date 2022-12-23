@@ -4,5 +4,3 @@ pandas
 statsmodels
 scipy
 plotly
-plotly.express
-scipy.stats
